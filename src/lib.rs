@@ -505,6 +505,28 @@ impl Scope {
 
         Ok(())
     }
+
+        /// Returns true if this scope's namespace contains the given name.
+        ///
+        /// Note: this will only search for names in the root namespace of the
+        /// scope, such as modules, traits, and type definitions; it will
+        /// not search inside of functions. Also, this function will not search
+        /// inside `Item::Raw`, adding code to a scope with `raw` will break
+        /// this.
+        pub fn contains_name<Q: ?Sized>(&self, name: &Q) -> bool
+        where
+            String: PartialEq<Q>,
+        {
+            self.items.iter()
+            .find(|item| match *item {
+                Item::Module(ref v) if v.name == name => true,
+                Item::Trait(ref v) if v.type_def.name == name => true,
+                Item::Struct(ref v) if v.type_def.name == name => true,
+                Item::Enum(ref v) if v.type_def.name == name => true,
+                Item::Function(ref v) if v.name == name => true,
+                _ => None,
+            })
+        }
 }
 
 // ===== impl Module =====
